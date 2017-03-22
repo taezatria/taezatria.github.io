@@ -44,13 +44,14 @@
 	},
 	"file_history":
 	[
-		"/home/m26415172/Documents/taezatria.github.io/index.html",
-		"/home/m26415172/Documents/taezatria.github.io/project/views.py",
 		"/home/m26415172/Documents/taezatria.github.io/project/templates/index.html",
-		"/home/m26415172/Documents/taezatria.github.io/run.py",
+		"/home/m26415172/Documents/taezatria.github.io/index.html",
 		"/home/m26415172/Documents/taezatria.github.io/project/app.py",
-		"/home/m26415172/Documents/taezatria.github.io/project/main.py",
+		"/home/m26415172/Documents/taezatria.github.io/run.py",
 		"/home/m26415172/Documents/taezatria.github.io/project/settings.py",
+		"/home/m26415172/Documents/taezatria.github.io/project/views.py",
+		"/home/m26415172/Documents/taezatria.github.io/project/main.py",
+		"/home/m26415172/Documents/taezatria.github.io/project/__init__.py",
 		"/home/m26415172/Documents/taezatria.github.io/project/templates/page.html",
 		"/home/m26415172/Documents/taezatria.github.io/project/templates/base.html",
 		"/home/m26415172/Documents/taezatria.github.io/freeze.py",
@@ -76,7 +77,7 @@
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 34.0
 	},
 	"find_in_files":
 	{
@@ -90,6 +91,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"bootstrap"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -114,7 +116,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 0.0
+		"height": 23.0
 	},
 	"input":
 	{
@@ -151,7 +153,7 @@
 	"project": "settings.sublime-project",
 	"replace":
 	{
-		"height": 0.0
+		"height": 42.0
 	},
 	"save_all_on_build": true,
 	"select_file":
