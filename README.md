@@ -1,2 +1,0 @@
-# taezatria.github.io
-Welcome
