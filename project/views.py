@@ -1,9 +1,15 @@
 from flask import render_template
-from app import app, pages
+from werkzeug import secure_filename
+from app import app
+import os
 
 @app.route('/')
 def home():
-#	posts = [page for page in pages if 'date' in page.meta]
-	# Sort pages by date
-#	sorted_posts = sorted(posts, reverse=True, key=lambda page: page.meta['date'])
-	return render_template('index.html')
+	if request.method == 'POST':
+		f = request.files['file']
+		filename = secure_filename(f.filename)
+		f.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
+		s = 'Uploaded Successfully'
+	else:
+		s = ''
+	return render_template('upload.html',success = s)
