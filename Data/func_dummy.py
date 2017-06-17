@@ -12,10 +12,11 @@ import time
 N = 9
 W = N + 2
 empty = "\n".join([(N+1)*' '] + N*[' '+N*'.'] + [(N+2)*' '])
-colstr = 'ABCDEFGHJKLMNOPQRST'
+colstr = 'ABCDEFGHIJKLMNOPQRST'
+rnd = 'ABCDEFGHI'
 MAX_GAME_LEN = N * N * 3
 
-N_SIMS = 400
+N_SIMS = 1000
 RAVE_EQUIV = 3500
 EXPAND_VISITS = 8
 PRIOR_EVEN = 10
@@ -31,11 +32,11 @@ PROB_HEURISTIC = {'capture': 0.9, 'pat3': 0.95}
 PROB_SSAREJECT = 0.9
 PROB_RSAREJECT = 0.5
 RESIGN_THRES = 0.2
-FASTPLAY5_THRES = 0.4
-FASTPLAY4_THRES = 0.5
-FASTPLAY3_THRES = 0.6
-FASTPLAY2_THRES = 0.7
-FASTPLAY1_THRES = 0.8
+FASTPLAY5_THRES = 0.5
+FASTPLAY4_THRES = 0.6
+FASTPLAY3_THRES = 0.7
+FASTPLAY2_THRES = 0.8
+FASTPLAY1_THRES = 0.9
 
 pat3src = [
        ["XOX",
@@ -47,7 +48,7 @@ pat3src = [
        ["XO?",
         "X..",
         "x.?"],
-       ["XOO",  
+       ["XOO",
         "...",
         "?.?"],
        [".O.",
@@ -192,13 +193,13 @@ class Position(namedtuple('Position', 'board cap n ko last last2 komi')):
             fboard = floodfill(board, d)
             if contact(fboard, '.') is not None:
                 continue  # some liberties left
-            
+
             capcount = fboard.count('#')
             if capcount == 1:
                 singlecaps.append(d)
             capX += capcount
             board = fboard.replace('#', '.')
-      
+
         ko = singlecaps[0] if in_enemy_eye and len(singlecaps) == 1 else None
 
         if contact(floodfill(board, c), '.') is None:
@@ -222,13 +223,13 @@ class Position(namedtuple('Position', 'board cap n ko last last2 komi')):
             elif i == -1:
                 i = 0
                 passes += 1
-                continue 
+                continue
             if is_eye(self.board, i) == 'X':
                 continue
             yield i
 
     def last_moves_neighbors(self):
-       
+
         clist = []
         for c in self.last, self.last2:
             if c is None:  continue
@@ -238,7 +239,7 @@ class Position(namedtuple('Position', 'board cap n ko last last2 komi')):
         return clist
 
     def score(self, owner_map=None):
-        
+
         board = self.board
         i = 0
         while True:
@@ -246,7 +247,7 @@ class Position(namedtuple('Position', 'board cap n ko last last2 komi')):
             if i == -1:
                 break
             fboard = floodfill(board, i)
-           
+
             touches_X = contact(fboard, 'X') is not None
             touches_x = contact(fboard, 'x') is not None
             if touches_X and not touches_x:
@@ -255,7 +256,7 @@ class Position(namedtuple('Position', 'board cap n ko last last2 komi')):
                 board = fboard.replace('#', 'x')
             else:
                 board = fboard.replace('#', ':')
-            
+
         komi = self.komi if self.n % 2 == 1 else -self.komi
         if owner_map is not None:
             for c in range(W*W):
@@ -269,14 +270,14 @@ def empty_position():
 
 
 def fix_atari(pos, c, singlept_ok=False, twolib_test=True, twolib_edgeonly=False):
-    
+
     def read_ladder_attack(pos, c, l1, l2):
 
         for l in [l1, l2]:
             pos_l = pos.move(l)
             if pos_l is None:
                 continue
-            
+
             is_atari, atari_escape = fix_atari(pos_l, c, twolib_test=False)
             if is_atari and not atari_escape:
                 return l
@@ -410,7 +411,7 @@ def load_spat_patterndict(f):
 
 large_patterns = dict()
 def load_large_patterns(f):
-   
+
     for line in f:
         p = float(line.split()[0])
         m = re.search('s:(\d+)', line)
@@ -543,7 +544,7 @@ class TreeNode():
         cfg_map = cfg_distances(self.pos.board, self.pos.last) if self.pos.last is not None else None
         self.children = []
         childset = dict()
- 
+
         for c, kind in gen_playout_moves(self.pos, range(N, (N+1)*W), expensive_ok=True):
             pos2 = self.pos.move(c)
             if pos2 is None:
@@ -710,8 +711,8 @@ def tree_search(tree, n, owner_map, disp=False):
 
 
         best_wr = tree.best_move().winrate()
-        if i > n*0.025 and best_wr > FASTPLAY1_THRES or i > n*0.05 and best_wr > FASTPLAY2_THRES or i > n*0.075 and best_wr > FASTPLAY3_THRES \
-            or i > n*0.1 and best_wr > FASTPLAY4_THRES or i > n*0.25 and best_wr > FASTPLAY5_THRES:
+        if i > n*0.1 and best_wr > FASTPLAY1_THRES or i > n*0.2 and best_wr > FASTPLAY2_THRES or i > n*0.3 and best_wr > FASTPLAY3_THRES \
+            or i > n*0.4 and best_wr > FASTPLAY4_THRES or i > n*0.5 and best_wr > FASTPLAY5_THRES:
             break
 
     for c in range(W*W):
@@ -798,21 +799,17 @@ def str_coord(c):
 
 
 def goblock(arg):
+    tree = TreeNode(Position(board=arg, cap=(0, 0), n=0, ko=None, last=None, last2=None, komi=7.5))
+    tree.expand()
+    owner_map = W*W*[0]
+    tree = tree_search(tree, N_SIMS, owner_map)
+    ret = str_coord(tree.pos.last)
+    print('%s' % ret)
+    return ret
+
+if __name__ == '__main__':
     try:
-        with open(spat_patterndict_file) as f:
-            print('Loading pattern spatial dictionary...', file=sys.stderr)
-            load_spat_patterndict(f)
-        with open(large_patterns_file) as f:
-            print('Loading large patterns...', file=sys.stderr)
-            load_large_patterns(f)
-        print('Done.', file=sys.stderr)
-    except IOError as e:
-#        print('Warning: Cannot load pattern files: %s; will be much weaker, consider lowering EXPAND_VISITS 5->2' % (e,), file=sys.stderr)
-        tree = TreeNode(Position(board=arg, cap=(0, 0), n=0, ko=None, last=None, last2=None, komi=7.5))
-        tree.expand()
-        owner_map = W*W*[0]
-        tree = tree_search(tree, N_SIMS, owner_map)
-        ret = str_coord(tree.pos.last)
-#       print('%s ' % ret)
-        return ret
-    
+    	goblock(sys.argv[1])
+    except IndexError:
+        out = random.choice(rnd) + str(random.randint(1, 9))
+        print('%s' %out)
